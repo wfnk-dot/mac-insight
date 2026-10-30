@@ -345,7 +345,12 @@ final class DiskTests: XCTestCase {
         XCTAssertEqual(decoded.folderSizes, cache.folderSizes)
         XCTAssertEqual(decoded.biggestFiles, result.biggestFiles)
         XCTAssertEqual(decoded.summary.buckets, summary.buckets)
-        XCTAssertNotNil(decoded.tree.descendant(["Users", "wyn", "📈"]))
+        XCTAssertNotNil(decoded.tree.descendant(["Users", "wyn", "Caf\u{E9}"]))
+        // The tiny emoji folder is merged into "1 smaller item" in the pruned
+        // tree, but keeps its own entry in the folder sizes.
+        XCTAssertNil(decoded.tree.descendant(["Users", "wyn", "📈"]))
+        XCTAssertNotNil(decoded.tree.descendant(["Users", "wyn", "1 smaller item"]))
+        XCTAssertEqual(decoded.folderSizes["/Users/wyn/📈"], 4096)
         XCTAssertEqual(decoded.folderSizes["/Users/wyn/Caf\u{E9}"], AllocationMath.roundUp(60_000_000))
     }
 
